@@ -169,3 +169,24 @@ spring           latest              66ef80fc645d        16 hours ago        170
 <br>docker ps -a ：查看当前服务器上所有容器。
 <br>服务器开启后，通过浏览器访问 'http://10.58.14.251:8080/hello' 即可看到”hi“，说明docker运行spring成功
 
+
+
+
+
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.24.1/minikube-linux-amd64
+chmod +x minikube
+sudo mv minikube /home/reinhardt/demo/
+scp /home/reinhardt/demo/minikube root@10.58.14.251:~/
+
+server上
+mv minikube /usr/local/bin/
+minikube
+permission denied  
+输入命令 sudo chmod -R 777  /工作目录
+解决问题
+
+
+minikube启动报错
+ Error updating cluster:  Error updating localkube from uri: Error creating localkube asset from url: Error opening file asset: /root/.minikube/cache/localkube/localkube-v1.8.0: open /root/.minikube/cache/localkube/localkube-v1.8.0: no such file or directory
+解决  minikube config set WantReportErrorPrompt false
+
