@@ -190,3 +190,20 @@ minikube启动报错
  Error updating cluster:  Error updating localkube from uri: Error creating localkube asset from url: Error opening file asset: /root/.minikube/cache/localkube/localkube-v1.8.0: open /root/.minikube/cache/localkube/localkube-v1.8.0: no such file or directory
 解决  minikube config set WantReportErrorPrompt false
 
+
+
+稍等一分钟左右，如果你的服务一直是containerCreating状态，没有变化，那就是创建实例出现问题，如下方法查看log
+
+sudo minikube logs
+日志中出现 failed pulling image… 则是因为镜像拉取失败导致服务创建失败，原因？GFW嘛！服务在拉取自身需要的gcr.io/google_containers/pause-amd64:3.0镜像时失败了，如下报错。
+
+Jan 05 03:52:58 minikube localkube[3624]: E0105 03:52:58.952990    3624 kuberuntime_manager.go:632] createPodSandbox for pod "nginx666-864b85987c-kvdpb_default(b0cc687d-f1cb-11e7-ba05-080027e170dd)" failed: rpc error: code = Unknown desc = failed pulling image "gcr.io/google_containers/pause-amd64:3.0": Error response from daemon: Get https://gcr.io/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
+解决方法：用本地镜像替代
+原理就是使用阿里云的镜像下载到本地，然后命名为minikube使用的gcr.io的同名镜像，替代远端镜像即可
+
+# 下载阿里云镜像
+docker pull registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0
+
+# 本地命名为 gcr.io/google_containers/pause-amd64:3.0
+docker tag registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0 gcr.io/google_containers/pause-amd64:3.0
+
