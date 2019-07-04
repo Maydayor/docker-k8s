@@ -316,3 +316,39 @@ sudo kubectl get pods
 NAMESPACE     NAME                             READY     STATUS             RESTARTS   AGE
 default       spring-test-77867567f5-48czx     1/1       Running            2          16h
 ```
+
+下面开始暴露端口
+<br>三种暴露端口的方式，NodePort、LoadBalancer 和 Ingress
+<br>这里先用nodeport做例子
+<br>首先
+```
+sudo kubectl expose deployment kube-nginx999 --type=NodePort
+```
+用nodeport方式暴露端口，然后
+```
+kubectl get service
+```
+查看当前运行状态以及端口号
+```
+NAME            TYPE           CLUSTER-IP       EXTERNAL-IP   PORT(S)           AGE
+kube-nginx999   NodePort       10.99.254.255    <none>        80:30180/TCP      17h
+kubernetes      ClusterIP      10.96.0.1        <none>        443/TCP           17h
+spring-test     NodePort       10.97.184.136    <none>        8080:30230/TCP    17h
+```
+使用curl访问
+```
+curl http://127.0.0.1:port
+```
+得到”Hello World“
+
+Loadbalancer以及Ingress方式暂时还没有尝试
+
+
+
+
+
+
+
+
+
+
