@@ -169,41 +169,152 @@ spring           latest              66ef80fc645d        16 hours ago        170
 <br>docker ps -a ：查看当前服务器上所有容器。
 <br>服务器开启后，通过浏览器访问 'http://10.58.14.251:8080/hello' 即可看到”hi“，说明docker运行spring成功
 
-
-
-
-
+## 安装minikube
+使用如下命令从官方下载最新的minicube到Ubuntu server上
+```
+curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.24.1/minikube-linux-amd64
+```
+遇到问题下载不了，Ubuntu server所在环境连接不到googleapis.com 所以改换策略，从本机虚拟机上下载需要文件，编成可执行文件上传服务器
+```
 curl -Lo minikube https://storage.googleapis.com/minikube/releases/v0.24.1/minikube-linux-amd64
 chmod +x minikube
 sudo mv minikube /home/reinhardt/demo/
 scp /home/reinhardt/demo/minikube root@10.58.14.251:~/
-
-server上
+```
+在服务器上执行
+```
 mv minikube /usr/local/bin/
-minikube
+```
+完成
+接下来输入
+```
+minikube -h
+```
+报错
+```
 permission denied  
-输入命令 sudo chmod -R 777  /工作目录
-解决问题
-
-
-minikube启动报错
+```
+查阅资料发现权限不够，猜测因为是外来可执行文件所以不给执行
+输入命令
+```
+sudo chmod -R 777  /usr/local/bin/
+```
+问题得到解决
+下面使用非虚拟机命令启动minikube
+因为是在linux下所以可以没有虚拟机启动
+```
+sudo minikube start --vm-driver=none
+```
+然后minikube启动报错
+```
  Error updating cluster:  Error updating localkube from uri: Error creating localkube asset from url: Error opening file asset: /root/.minikube/cache/localkube/localkube-v1.8.0: open /root/.minikube/cache/localkube/localkube-v1.8.0: no such file or directory
-解决  minikube config set WantReportErrorPrompt false
+ ```
+查阅资料是日志问题，输入
+```
+minikube config set WantReportErrorPrompt false
+```
+问题解决
+出现如下，表示minikube启动成功：
+```
+Starting local Kubernetes v1.8.0 cluster...
+Starting VM...
+Getting VM IP address...
+Moving files into cluster...
+Downloading localkube binary
+ 148.25 MB / 148.25 MB [============================================] 100.00% 0s
+ 0 B / 65 B [----------------------------------------------------------]   0.00%
+ 65 B / 65 B [======================================================] 100.00% 0sSetting up certs...
+Connecting to cluster...
+Setting up kubeconfig...
+Starting cluster components...
+Kubectl is now configured to use the cluster.
+===================
+WARNING: IT IS RECOMMENDED NOT TO RUN THE NONE DRIVER ON PERSONAL WORKSTATIONS
+    The 'none' driver will run an insecure kubernetes apiserver as root that may leave the host vulnerable to CSRF attacks
 
+When using the none driver, the kubectl config and credentials generated will be root owned and will appear in the root home directory.
+You will need to move the files to the appropriate location and then set the correct permissions.  An example of this is below:
 
+    sudo mv /root/.kube $HOME/.kube # this will write over any previous configuration
+    sudo chown -R $USER $HOME/.kube
+    sudo chgrp -R $USER $HOME/.kube
 
-稍等一分钟左右，如果你的服务一直是containerCreating状态，没有变化，那就是创建实例出现问题，如下方法查看log
+    sudo mv /root/.minikube $HOME/.minikube # this will write over any previous configuration
+    sudo chown -R $USER $HOME/.minikube
+    sudo chgrp -R $USER $HOME/.minikube
 
+This can also be done automatically by setting the env var CHANGE_MINIKUBE_NONE_USER=true
+Loading cached images from config file.
+```
+
+## 安装kubectl
+同理，连接不上，使用本地虚拟机上传
+```
+curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+chmod +x kubectl
+sudo mv kubrctl /home/reinhardt/demo/
+scp /home/reinhardt/demo/kubectl root@10.58.14.251:~/
+```
+在服务器上执行
+```
+mv kubectl /usr/local/bin/
+```
+完成
+接下来输入
+```
+kubectl version
+```
+可以查看到自己的client版本是v1.15.0，然后server版本是v1.8.0
+这里问题就来了
+如果版本相差太大
+kubectl基本无法使用，输入
+```
+kubectl get pods
+```
+提示server和client通信有问题，就是因为版本问题
+deployment也会提示有问题
+所以修改上文下载最新版kubectl，改为下载v1.8.0版本，重新安装一遍即可
+```
+curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
+```
+
+## 将image通过minikube部署
+通过image启动一个容器
+```
+sudo kubectl run spring-test --image=spring --port=8080
+```
+其中，spring-test是要定义的容器名称 spring:latest表明要用spring镜像 --port=8080表明容器对外暴露8080端口
+通过
+```
+kubectl get pods
+```
+查看当前pods，发现spring拉取失败，但是spring已经是本地镜像了（参考上文已经打包好spring镜像），所以加上--image-pull-policy=IfNotPresent，优先拉取本地镜像
+```
+sudo kubectl run spring-test --image=spring --port=8080 --image-pull-policy=IfNotPresent
+```
+稍等一分钟左右，如果你的服务一直是containerCreating状态，没有变化，那就是创建实例又出现问题，如下方法查看log
+```
 sudo minikube logs
-日志中出现 failed pulling image… 则是因为镜像拉取失败导致服务创建失败，原因？GFW嘛！服务在拉取自身需要的gcr.io/google_containers/pause-amd64:3.0镜像时失败了，如下报错。
-
+```
+日志中出现 failed pulling image… 服务在拉取自身需要的gcr.io/google_containers/pause-amd64:3.0镜像时失败了，如下报错。
+```
 Jan 05 03:52:58 minikube localkube[3624]: E0105 03:52:58.952990    3624 kuberuntime_manager.go:632] createPodSandbox for pod "nginx666-864b85987c-kvdpb_default(b0cc687d-f1cb-11e7-ba05-080027e170dd)" failed: rpc error: code = Unknown desc = failed pulling image "gcr.io/google_containers/pause-amd64:3.0": Error response from daemon: Get https://gcr.io/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
+```
 解决方法：用本地镜像替代
 原理就是使用阿里云的镜像下载到本地，然后命名为minikube使用的gcr.io的同名镜像，替代远端镜像即可
 
-# 下载阿里云镜像
+下载阿里云镜像
+```
 docker pull registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0
-
-# 本地命名为 gcr.io/google_containers/pause-amd64:3.0
+```
+本地命名为 gcr.io/google_containers/pause-amd64:3.0
+```
 docker tag registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0 gcr.io/google_containers/pause-amd64:3.0
+```
+再次查看pods，发现此时status已经变成running，服务启动成功
+```
+sudo kubectl get pods
 
+NAMESPACE     NAME                             READY     STATUS             RESTARTS   AGE
+default       spring-test-77867567f5-48czx     1/1       Running            2          16h
+```
