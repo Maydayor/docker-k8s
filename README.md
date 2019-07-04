@@ -51,7 +51,7 @@ public class HelloController {
 我是使用的scp来往Ubuntu server上上传文件的
 <br>首先server端安装openssh-server
 <br>```$ sudo apt-get install openssh-server```  
-<br>client上安装openssh-client
+client上安装openssh-client
 <br>```$ sudo apt-get install openssh-client```
 <br>要从客户端把jar包上传到server上，执行以下命令
 <br>```$ scp /home/reinhardt/demo/demo2.jar root@10.58.14.251:~/```
