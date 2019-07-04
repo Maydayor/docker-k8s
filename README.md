@@ -185,8 +185,7 @@ scp /home/reinhardt/demo/minikube root@10.58.14.251:~/
 ```
 mv minikube /usr/local/bin/
 ```
-完成
-接下来输入
+完成，接下来输入
 ```
 minikube -h
 ```
@@ -195,13 +194,13 @@ minikube -h
 permission denied  
 ```
 查阅资料发现权限不够，猜测因为是外来可执行文件所以不给执行
-输入命令
+<br>输入命令
 ```
 sudo chmod -R 777  /usr/local/bin/
 ```
 问题得到解决
-下面使用非虚拟机命令启动minikube
-因为是在linux下所以可以没有虚拟机启动
+<br>下面使用非虚拟机命令启动minikube
+<br>因为是在linux下所以可以没有虚拟机启动
 ```
 sudo minikube start --vm-driver=none
 ```
@@ -214,7 +213,7 @@ sudo minikube start --vm-driver=none
 minikube config set WantReportErrorPrompt false
 ```
 问题解决
-出现如下，表示minikube启动成功：
+<br>出现如下，表示minikube启动成功：
 ```
 Starting local Kubernetes v1.8.0 cluster...
 Starting VM...
@@ -260,20 +259,21 @@ scp /home/reinhardt/demo/kubectl root@10.58.14.251:~/
 mv kubectl /usr/local/bin/
 ```
 完成
-接下来输入
+<br>接下来输入
 ```
 kubectl version
 ```
 可以查看到自己的client版本是v1.15.0，然后server版本是v1.8.0
-这里问题就来了
+<br>这里问题就来了
 如果版本相差太大
-kubectl基本无法使用，输入
+kubectl基本无法使用，
+<br>输入
 ```
 kubectl get pods
 ```
 提示server和client通信有问题，就是因为版本问题
 deployment也会提示有问题
-所以修改上文下载最新版kubectl，改为下载v1.8.0版本，重新安装一遍即可
+<br>所以修改上文下载最新版kubectl，改为下载v1.8.0版本，重新安装一遍即可
 ```
 curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.0/bin/linux/amd64/kubectl
 ```
@@ -284,7 +284,7 @@ curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v1.8.
 sudo kubectl run spring-test --image=spring --port=8080
 ```
 其中，spring-test是要定义的容器名称 spring:latest表明要用spring镜像 --port=8080表明容器对外暴露8080端口
-通过
+<br>通过
 ```
 kubectl get pods
 ```
@@ -300,10 +300,8 @@ sudo minikube logs
 ```
 Jan 05 03:52:58 minikube localkube[3624]: E0105 03:52:58.952990    3624 kuberuntime_manager.go:632] createPodSandbox for pod "nginx666-864b85987c-kvdpb_default(b0cc687d-f1cb-11e7-ba05-080027e170dd)" failed: rpc error: code = Unknown desc = failed pulling image "gcr.io/google_containers/pause-amd64:3.0": Error response from daemon: Get https://gcr.io/v2/: net/http: request canceled while waiting for connection (Client.Timeout exceeded while awaiting headers)
 ```
-解决方法：用本地镜像替代
-原理就是使用阿里云的镜像下载到本地，然后命名为minikube使用的gcr.io的同名镜像，替代远端镜像即可
-
-下载阿里云镜像
+解决方法：用本地镜像替代，原理就是使用阿里云的镜像下载到本地，然后命名为minikube使用的gcr.io的同名镜像，替代远端镜像即可
+<br>下载阿里云镜像
 ```
 docker pull registry.cn-hangzhou.aliyuncs.com/google-containers/pause-amd64:3.0
 ```
