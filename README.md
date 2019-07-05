@@ -341,6 +341,12 @@ curl http://127.0.0.1:port
 ```
 得到”Hello World“
 
+<br>但是外网访问10.58.14.251:30230的时候并不能访问，查阅资料是转发规则问题，输入
+```
+iptables -P FORWARD ACCEPT
+```
+问题解决
+
 Loadbalancer以及Ingress方式暂时还没有尝试
 
 
