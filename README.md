@@ -1,4 +1,7 @@
 # docker-k8s
+
+>已阅 - Charles Guo
+
 ## 搭建简单的Spring-boot框架
 我是使用的intelliJ来搭建的Springboot框架，首先下载intelliJ以及Java最新的JDK
 <br>新建一个spring项目,点击坐上角file --->选择new --->点击project...
